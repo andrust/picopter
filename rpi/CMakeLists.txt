@@ -8,3 +8,7 @@ add_executable( flight-control
     Imu.cc
     I2C.cc
 )
+
+target_link_libraries( flight-control
+    pthread
+)
