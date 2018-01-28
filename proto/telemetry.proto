@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package fc;
+
+message TelemetryRecord {
+    uint64 timestamp = 1;
+    int32 pitch = 2;
+    int32 roll = 3;
+    int32 yaw = 4;
+}
+

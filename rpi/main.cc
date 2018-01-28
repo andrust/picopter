@@ -2,6 +2,7 @@
 #include <csignal>
 #include <thread>
 #include <cstdint>
+#include <google/protobuf/stubs/common.h>
 
 #include "I2C.h"
 #include "Telemetry.h"
@@ -30,7 +31,7 @@ int main(int argc, char* argv[]) {
     std::chrono::system_clock::time_point now;
 
     while(!should_exit) {
-        std::cout << "heartbeat" << std::endl;
+        //std::cout << "heartbeat" << std::endl;
 
         now = std::chrono::system_clock::now();
 
@@ -42,5 +43,8 @@ int main(int argc, char* argv[]) {
     }
 
     std::cout << "Exiting..." << std::endl;
+
+    google::protobuf::ShutdownProtobufLibrary();
+
     return 0;
 }
