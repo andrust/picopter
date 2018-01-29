@@ -5,6 +5,7 @@ add_executable( flight-control
     Telemetry.cc
     Imu.cc
     I2C.cc
+    PID.cc
     ZmqHelper.cc
 )
 
