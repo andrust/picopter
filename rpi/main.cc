@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <google/protobuf/stubs/common.h>
 
-#include "I2C.h"
 #include "Telemetry.h"
 #include "Imu.h"
 
@@ -25,21 +24,19 @@ int main(int argc, char* argv[]) {
     signal(SIGINT, sig_handler);
     signal(SIGTERM, sig_handler);
 
-    I2C i2c;
-    Imu imu(i2c);
+    Imu imu;
+
     Telemetry telemetry;
     std::chrono::system_clock::time_point now;
 
     while(!should_exit) {
-        //std::cout << "heartbeat" << std::endl;
-
-        now = std::chrono::system_clock::now();
-
         imu.refresh();
+        now = std::chrono::system_clock::now();
         telemetry.updateOrientation(imu.pitch(), imu.roll(), imu.yaw());
+        telemetry.updateTemp(imu.temp());
         telemetry.updateTime(now);
 
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 
     std::cout << "Exiting..." << std::endl;

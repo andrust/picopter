@@ -15,8 +15,7 @@ def main():
         buf = s.recv()
         rec = TelemetryRecord()
         rec.ParseFromString(buf)
-        print "Received ts: %lu, roll: %li, pitch: %li, yaw: %li" % (rec.timestamp, rec.roll, rec.pitch, rec.yaw)
-        print rec.timestamp
+        print "Received ts: %lu, roll: %lf, pitch: %lf, yaw: %lf, temp:%lf" % (rec.timestamp, rec.roll, rec.pitch, rec.yaw, rec.temp)
 
 if __name__ == "__main__":
     main()

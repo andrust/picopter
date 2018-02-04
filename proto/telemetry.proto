@@ -4,8 +4,8 @@ package fc;
 
 message TelemetryRecord {
     uint64 timestamp = 1;
-    int32 pitch = 2;
-    int32 roll = 3;
-    int32 yaw = 4;
+    double pitch = 2;
+    double roll = 3;
+    double yaw = 4;
+    double temp = 5;
 }
-

@@ -6,15 +6,14 @@
 
 class PID {
 public:
-    PID();
-    int32_t update(int32_t currentValue, std::chrono::system_clock::time_point ts);
-    void set(int32_t value) { _target = static_cast<double>(value); }
+    PID(double kp, double ki, double kd);
+    double update(double currentValue, std::chrono::system_clock::time_point ts);
+    void set(double value) { _target = value; }
 
 private:
-
-    static constexpr double P_GAIN = 5.0;
-    static constexpr double I_GAIN = 3.0;
-    static constexpr double D_GAIN = 3.0;
+    double _kP = 5.0;
+    double _kI = 3.0;
+    double _kD = 3.0;
 
     double _lastErr = 0.0;
     std::chrono::system_clock::time_point _lastTs;

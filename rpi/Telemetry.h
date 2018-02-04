@@ -16,8 +16,9 @@ private:
     static constexpr std::chrono::milliseconds DEFAULT_TELEMETRY_INTERVAL{300};
 
 public:
-    void updateOrientation(int32_t pitch, int32_t roll, int32_t yaw);
+    void updateOrientation(double pitch, double roll, double yaw);
     void updateTime(const std::chrono::system_clock::time_point& now);
+    void updateTemp(double temp);
 
 private:
     void senderThread();
@@ -26,10 +27,11 @@ private:
 private:
     bool _stopFlag = false;
     std::thread _senderThread;
-    std::atomic_int _pitch;
-    std::atomic_int _roll;
-    std::atomic_int _yaw;
-    std::atomic_int _ts;
+    std::atomic<double> _pitch;
+    std::atomic<double> _roll;
+    std::atomic<double> _yaw;
+    std::atomic<double> _temp;
+    std::atomic_uint _ts;
 
     zmq::socket_t _pubsocket;
 };

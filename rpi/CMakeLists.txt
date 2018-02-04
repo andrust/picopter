@@ -4,13 +4,16 @@ add_executable( flight-control
     main.cc
     Telemetry.cc
     Imu.cc
-    I2C.cc
     PID.cc
     ZmqHelper.cc
+    Controller.cc
+    Motor.cc
+    Pwm.cc
 )
 
 target_link_libraries( flight-control
     pthread
     zmq
     telemetry_proto
+    wiringPi
 )

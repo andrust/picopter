@@ -19,7 +19,7 @@ Telemetry::~Telemetry() {
     }
 }
 
-void Telemetry::updateOrientation(int32_t pitch, int32_t roll, int32_t yaw) {
+void Telemetry::updateOrientation(double pitch, double roll, double yaw) {
     _pitch = pitch;
     _roll = roll;
     _yaw = yaw;
@@ -28,6 +28,10 @@ void Telemetry::updateOrientation(int32_t pitch, int32_t roll, int32_t yaw) {
 void Telemetry::updateTime(const std::chrono::system_clock::time_point& now) {
     using namespace std::chrono;
     _ts = duration_cast<microseconds>(now.time_since_epoch()).count();
+}
+
+void Telemetry::updateTemp(double temp) {
+    _temp = temp;
 }
 
 void Telemetry::senderThread() {
@@ -45,6 +49,7 @@ std::string Telemetry::createMsg() {
     rec.set_pitch(_pitch);
     rec.set_roll(_roll);
     rec.set_yaw(_yaw);
+    rec.set_temp(_temp);
     std::string ret;
     rec.SerializeToString(&ret);
     return ret;
