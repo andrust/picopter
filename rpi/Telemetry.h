@@ -31,7 +31,7 @@ private:
     std::atomic<double> _roll;
     std::atomic<double> _yaw;
     std::atomic<double> _temp;
-    std::atomic_uint _ts;
+    std::atomic<uint64_t> _ts;
 
     zmq::socket_t _pubsocket;
 };

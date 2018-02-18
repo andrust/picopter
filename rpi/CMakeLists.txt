@@ -9,6 +9,7 @@ add_executable( flight-control
     Controller.cc
     Motor.cc
     Pwm.cc
+    I2C.cc
 )
 
 target_link_libraries( flight-control

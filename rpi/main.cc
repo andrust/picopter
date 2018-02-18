@@ -24,19 +24,24 @@ int main(int argc, char* argv[]) {
     signal(SIGINT, sig_handler);
     signal(SIGTERM, sig_handler);
 
-    Imu imu;
+    try {
+        Imu imu;
 
-    Telemetry telemetry;
-    std::chrono::system_clock::time_point now;
+        Telemetry telemetry;
+        std::chrono::system_clock::time_point now;
 
-    while(!should_exit) {
-        imu.refresh();
-        now = std::chrono::system_clock::now();
-        telemetry.updateOrientation(imu.pitch(), imu.roll(), imu.yaw());
-        telemetry.updateTemp(imu.temp());
-        telemetry.updateTime(now);
+        while(!should_exit) {
+            imu.refresh();
+            now = std::chrono::system_clock::now();
+            telemetry.updateOrientation(imu.pitch(), imu.roll(), imu.yaw());
+            telemetry.updateTemp(imu.temp());
+            telemetry.updateTime(now);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+    }
+    catch(const std::exception& e) {
+        std::cerr << e.what() << std::endl;
     }
 
     std::cout << "Exiting..." << std::endl;

@@ -1,51 +1,96 @@
 #include "Imu.h"
 
-#include <wiringPi.h>
-#include <wiringPiI2C.h>
 #include <chrono>
 #include <thread>
+#include <iostream>
+#include <iomanip>
 
 Imu::Imu()
-: _dev(wiringPiI2CSetup (0x28))
+: _dev(0x28)
 {
-    reset();
-    setMode(Mode::CONFIG);
-    setupUnits();
-    setupTemp();
-    setMode(Mode::NDOF);
+    _dev.setWriteDelay(20000);
+    _dev.setReadDelay(10000);
+    try {
+        reset();
+        setMode(Mode::CONFIG);
+        setupUnits();
+        setupTemp();
+        setMode(Mode::NDOF);
+    }
+    catch(const i2c_error& e) {
+        throw imu_error("Failed to initialize IMU: ", e.what());
+    }
 }
 
 void Imu::refresh() {
-    int16_t pitch = wiringPiI2CReadReg16(_dev, 0x1f);
-    int16_t roll = wiringPiI2CReadReg16(_dev, 0x1d);
-    int16_t yaw = wiringPiI2CReadReg16(_dev, 0x1b);
-    int8_t temp = wiringPiI2CReadReg8(_dev, 0x34);
+    try {
+        _yaw =   readAxis(0x1a, 0,       360*16, "yaw  ");
+        _roll =  readAxis(0x1c, -90*16,  90*16,  "roll ");
+        _pitch = readAxis(0x1e, -180*16, 180*16, "pitch");
+        _temp = readTemp();
+    }
+    catch(const i2c_error& e) {
+        std::cerr << e.what() << std::endl;
+    }
+}
 
-    _pitch = static_cast<double>(pitch) / 16.0;
-    _roll = static_cast<double>(roll) / 16.0;
-    _yaw = static_cast<double>(yaw) / 16.0;
-    _temp = static_cast<double>(temp);
+double Imu::readAxis(uint8_t reg_start, int16_t reg_lb, int16_t reg_ub, const char* axis_name) {
+    int16_t res = _dev.read16Signed(reg_start);
+    if (res < reg_lb || res > reg_ub) {
+        std::cerr << "invalid " << axis_name << " value: " << std::hex << res << std::endl;
+        res = 0;
+    }
+    return static_cast<double>(res) / 16.0;
+}
+
+double Imu::readTemp() {
+    return static_cast<double>(_dev.read8Signed(0x34));
 }
 
 void Imu::reset() {
-    wiringPiI2CWriteReg8(_dev, 0x3f, 0x20);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    while(0xa0 != wiringPiI2CReadReg8(_dev, 0x00)) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    try {
+        _dev.write8(0x3f, 0x20);
+        std::this_thread::sleep_for(std::chrono::milliseconds(600));
+    }
+    catch(const std::exception& e) {
+        throw imu_error("failed to issue reset comand: ", e.what());
+    }
+    uint8_t res = 0;
+    while(0xa0 != res) {
+        try {
+            res = _dev.read8(0x00);
+        }
+        catch(const std::exception& e) {
+            std::cerr << "Failed to read ChipId: " << e.what() << std::endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
     }
 }
 
 void Imu::setMode(Mode m) {
-    wiringPiI2CWriteReg8(_dev, 0x3d, static_cast<std::underlying_type<Mode>::type>(m));
-    std::this_thread::sleep_for(std::chrono::milliseconds(25));
+    try {
+        _dev.write8(0x3d, static_cast<std::underlying_type<Mode>::type>(m));
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    }
+    catch(const std::exception& e) {
+        throw imu_error("SetMode failed: ", e.what());
+    }
 }
 
 void Imu::setupUnits() {
-    wiringPiI2CWriteReg8(_dev, 0x3b, 0x80);
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    try {
+        _dev.write8(0x3b, 0x80);
+    }
+    catch(const std::exception& e) {
+        throw imu_error("SetupUnits failed: ", e.what());
+    }
 }
 
 void Imu::setupTemp() {
-    wiringPiI2CWriteReg8(_dev, 0x40, 0x00);
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    try {
+        _dev.write8(0x40, 0x01);
+    }
+    catch(const std::exception& e) {
+        throw imu_error("SetupTemp failed: ", e.what());
+    }
 }
